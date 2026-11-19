@@ -36,9 +36,36 @@ let profileIndex = 0;
 })();
 let profileBusy = false;
 
+// Efek bintang saat foto profil diklik
+function burstStars(el) {
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const colors = ['#ffd166', '#ff6b6b', '#4dabf7', '#06d6a0', '#b197fc', '#ff9f43'];
+    const total = 14;
+    for (let i = 0; i < total; i++) {
+        const s = document.createElement('span');
+        const angle = (i / total) * Math.PI * 2 + Math.random() * 0.4;
+        const dist = r.width * 0.55 + Math.random() * 60;
+        s.className = 'star';
+        s.setAttribute('aria-hidden', 'true');
+        s.textContent = '\u2605';
+        s.style.left = cx + 'px';
+        s.style.top = cy + 'px';
+        s.style.color = colors[i % colors.length];
+        s.style.fontSize = (12 + Math.random() * 14) + 'px';
+        s.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        s.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+        document.body.appendChild(s);
+        setTimeout(function () { s.remove(); }, 1000);
+    }
+}
+
 function toggleProfile() {
     if (profileBusy) return; // cegah klik beruntun saat transisi
     profileBusy = true;
+    burstStars(document.querySelector('.profile-container'));
 
     const img = document.getElementById('profileImg');
     profileIndex = (profileIndex + 1) % profilePhotos.length;
@@ -171,7 +198,8 @@ function switchTab(tabName) {
     });
 
     function columnCount() {
-        return 0; // grid CSS seragam di semua ukuran layar (masonry dinonaktifkan)
+        if (!mq.matches) return 2;                 // HP: 2 kolom
+        return window.innerWidth >= 1200 ? 4 : 3;  // tablet: 3 kolom, laptop: 4 kolom
     }
 
     function build(g, n) {
