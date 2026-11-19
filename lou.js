@@ -162,12 +162,16 @@ function switchTab(tabName) {
             const img = card.querySelector('img');
             const title = card.querySelector('.card-overlay h3');
             if (img && title && !title.textContent.trim()) title.textContent = img.alt;
+            const no = document.createElement('span');
+            no.className = 'card-no';
+            no.setAttribute('aria-hidden', 'true');
+            no.textContent = String(i + 1).padStart(2, '0');
+            card.appendChild(no);
         });
     });
 
     function columnCount() {
-        if (!mq.matches) return 0;                 // HP: tanpa masonry
-        return window.innerWidth >= 1024 ? 3 : 2;  // laptop: 3 kolom, tablet: 2 kolom
+        return 0; // grid CSS seragam di semua ukuran layar (masonry dinonaktifkan)
     }
 
     function build(g, n) {
