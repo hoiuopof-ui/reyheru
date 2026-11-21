@@ -492,8 +492,8 @@ body { background-image: none; }
 .card-img { aspect-ratio: 4 / 5; object-fit: cover; }
 .card-no {
     position: absolute; right: 0.6rem; bottom: 0.6rem; padding: 0.1rem 0.55rem;
-    font-size: 0.7rem; letter-spacing: 0.05em; color: #fff; background: rgba(0, 0, 0, 0.45);
-    border-radius: 999px; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); pointer-events: none;
+    font-size: 0.7rem; letter-spacing: 0.05em; color: #fff; background: rgba(0, 0, 0, 0.55);
+    border-radius: 999px; pointer-events: none;
 }
 @media (min-width: 768px)  { .gallery-container.row.gallery-visible { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; } }
 @media (min-width: 1200px) { .gallery-container.row.gallery-visible { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -763,7 +763,6 @@ html:not(.dark) body {
         radial-gradient(55rem 38rem at 8% 0%, rgba(255, 183, 140, 0.38), transparent 62%),
         radial-gradient(50rem 38rem at 100% 18%, rgba(140, 185, 255, 0.32), transparent 62%),
         radial-gradient(58rem 38rem at 50% 100%, rgba(140, 220, 190, 0.32), transparent 62%);
-    background-attachment: fixed;
 }
 .about, .gallery-nav, .site-footer, .site-menu-panel { background: var(--lou-panel); }
 html:not(.dark) .card { box-shadow: 0 8px 22px rgba(70, 55, 30, 0.16); }
@@ -803,8 +802,6 @@ html.music-on.dark .profile-container {
 }
 
 /* Latar ikut hidup saat musik menyala */
-html.music-on:not(.dark) body::before { filter: saturate(2.2); }
-html.music-on.dark body::before { filter: saturate(2) brightness(2); }
 
 /* Karakter joget di pojok kiri bawah */
 .dancer {
@@ -872,15 +869,11 @@ html.music-on.dark .profile-container::after {
 
 
 /* ---------- Efek berhenti dengan memudar halus (html.music-fading) ---------- */
-body::before { transition: filter 1.1s ease; }
 
 html.music-on .profile-container::before,
 html.music-on .profile-container::after { filter: opacity(1); transition: filter 1s ease; }
 html.music-on.music-fading .profile-container::before,
 html.music-on.music-fading .profile-container::after { filter: opacity(0); }
-
-html.music-on.music-fading:not(.dark) body::before,
-html.music-on.music-fading.dark body::before { filter: none; }
 
 html.music-on.music-fading .dancer {
     opacity: 0;
@@ -888,24 +881,31 @@ html.music-on.music-fading .dancer {
     transition: opacity 1s ease, transform 1s ease;
 }
 
+body::before { will-change: transform; }
+
 
 /* =====================================================
-   LATAR SAAT MUSIK MENYALA
+   LATAR SAAT MUSIK MENYALA (versi ringan: hanya opacity & transform)
    Siang : kotak-kotak berwarna berkelap-kelip
-   Malam : cahaya pelangi menyala di belakang
+   Malam : cahaya pelangi bergeser di belakang
    ===================================================== */
 html::before, html::after, body::after {
-    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    opacity: 0; filter: opacity(0); transition: filter 1s ease;
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
 }
 
 /* ----- Siang ----- */
 html:not(.dark)::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cg fill-opacity='.55'%3E%3Crect x='40' y='40' width='40' height='40' fill='%23ff6b6b'/%3E%3Crect x='160' y='0' width='40' height='40' fill='%23ffd166'/%3E%3Crect x='0' y='120' width='40' height='40' fill='%23ff9f43'/%3E%3Crect x='200' y='160' width='40' height='40' fill='%23ff6b9d'/%3E%3Crect x='120' y='200' width='40' height='40' fill='%23ffb347'/%3E%3C/g%3E%3C/svg%3E"); background-size: 240px 240px; }
 html:not(.dark)::after  { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cg fill-opacity='.55'%3E%3Crect x='80' y='80' width='40' height='40' fill='%234dabf7'/%3E%3Crect x='200' y='40' width='40' height='40' fill='%2306d6a0'/%3E%3Crect x='0' y='200' width='40' height='40' fill='%23a78bfa'/%3E%3Crect x='160' y='160' width='40' height='40' fill='%2338bdf8'/%3E%3Crect x='240' y='0' width='40' height='40' fill='%2334d399'/%3E%3C/g%3E%3C/svg%3E"); background-size: 280px 280px; }
 html:not(.dark) body::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg fill-opacity='.55'%3E%3Crect x='0' y='0' width='40' height='40' fill='%23f472b6'/%3E%3Crect x='80' y='120' width='40' height='40' fill='%23facc15'/%3E%3Crect x='160' y='40' width='40' height='40' fill='%232dd4bf'/%3E%3Crect x='40' y='160' width='40' height='40' fill='%23fb7185'/%3E%3C/g%3E%3C/svg%3E"); background-size: 200px 200px; }
-html.music-on:not(.dark)::before { filter: opacity(1); animation: twinkle 3.2s ease-in-out infinite; }
-html.music-on:not(.dark)::after  { filter: opacity(1); animation: twinkle 4.4s ease-in-out -1.5s infinite; }
-html.music-on:not(.dark) body::after { filter: opacity(1); animation: twinkle 5.3s ease-in-out -3s infinite; }
+html.music-on:not(.dark)::before, html.music-on:not(.dark)::after, html.music-on:not(.dark) body::after {
+    will-change: opacity; transition: filter 1s ease;
+}
+html.music-on:not(.dark)::before { animation: twinkle 3.2s ease-in-out infinite; }
+html.music-on:not(.dark)::after  { animation: twinkle 4.4s ease-in-out -1.5s infinite; }
+html.music-on:not(.dark) body::after { animation: twinkle 5.3s ease-in-out -3s infinite; }
+html.music-on.music-fading:not(.dark)::before,
+html.music-on.music-fading:not(.dark)::after,
+html.music-on.music-fading:not(.dark) body::after { filter: opacity(0); }
 @keyframes twinkle {
     0%, 100% { opacity: 0.1; }
     20% { opacity: 1; }
@@ -914,26 +914,28 @@ html.music-on:not(.dark) body::after { filter: opacity(1); animation: twinkle 5.
     75% { opacity: 0.15; }
 }
 
-/* ----- Malam ----- */
+/* ----- Malam: garis-garis kotak menyala warna RGB ----- */
 html.dark body::after {
-    background: linear-gradient(90deg, #ff2e63, #ff9a00, #fff200, #00ff9d, #00d4ff, #7b2fff, #ff2e63);
-    background-size: 200vw 100%;
-    filter: blur(70px) opacity(0);
+    inset: 0;
+    background: linear-gradient(115deg, #ff2e63, #ff9a00, #fff200, #00ff9d, #00d4ff, #7b2fff, #ff2e63);
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 1px, transparent 4px, transparent 36px, #000 39px, #000 40px),
+                        linear-gradient(90deg, #000 0, #000 1px, transparent 4px, transparent 36px, #000 39px, #000 40px);
+    mask-image: linear-gradient(180deg, #000 0, #000 1px, transparent 4px, transparent 36px, #000 39px, #000 40px),
+                linear-gradient(90deg, #000 0, #000 1px, transparent 4px, transparent 36px, #000 39px, #000 40px);
+    -webkit-mask-size: 40px 40px; mask-size: 40px 40px;
+    transition: opacity 1s ease;
 }
 html.music-on.dark body::after {
-    filter: blur(70px) opacity(1);
-    animation: rainbowSlide 12s linear infinite, glowPulse 3s ease-in-out infinite;
+    opacity: 0.6; will-change: filter;
+    animation: rgbCycle 6s linear infinite;
 }
-@keyframes rainbowSlide { from { background-position: 0 0; } to { background-position: 200vw 0; } }
-@keyframes glowPulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.45; } }
-
-/* ----- Memudar halus saat musik dimatikan ----- */
-html.music-on.music-fading:not(.dark)::before,
-html.music-on.music-fading:not(.dark)::after,
-html.music-on.music-fading:not(.dark) body::after { filter: opacity(0); }
-html.music-on.music-fading.dark body::after { filter: blur(70px) opacity(0); }
+html.music-on.music-fading.dark body::after { opacity: 0; }
+@keyframes rgbCycle {
+    from { filter: hue-rotate(0deg) saturate(1.3); }
+    to   { filter: hue-rotate(360deg) saturate(1.3); }
+}
 
 @media (prefers-reduced-motion: reduce) {
-    html.music-on:not(.dark)::before, html.music-on:not(.dark)::after, html.music-on:not(.dark) body::after,
-    html.music-on.dark body::after { animation: none; opacity: 0.35; }
+    html.music-on:not(.dark)::before, html.music-on:not(.dark)::after, html.music-on:not(.dark) body::after { animation: none; opacity: 0.35; }
+    html.music-on.dark body::after { animation: none; }
 }
