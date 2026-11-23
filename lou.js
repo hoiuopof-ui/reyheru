@@ -5,6 +5,18 @@
 (function () { document.documentElement.classList.add('js'); })();
 
 const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// MODE RINGAN: otomatis aktif di HP / layar sentuh / perangkat spek rendah.
+// Efek berat saat musik menyala (animasi latar, not melayang, video, dll) dimatikan.
+const LITE_FORCE = true;             // true = selalu ringan (default sekarang), null = otomatis, false = efek penuh
+const DANCER_ON_LITE = true;        // video joget tampil (kecil & polos); false = dimatikan
+const LITE = (LITE_FORCE !== null) ? LITE_FORCE : (
+    window.matchMedia('(max-width: 768px)').matches ||
+    window.matchMedia('(pointer: coarse)').matches ||
+    (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+    (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+);
+if (LITE) document.documentElement.classList.add('lite');
 const store = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -26,7 +38,7 @@ function toggleTheme() {
         syncThemeLabel();
     };
     // Transisi tema yang halus (cross-fade) bila browser mendukung
-    if (document.startViewTransition && !REDUCE_MOTION) document.startViewTransition(apply);
+    if (document.startViewTransition && !REDUCE_MOTION && !LITE) document.startViewTransition(apply);
     else apply();
 }
 syncThemeLabel();
@@ -309,6 +321,17 @@ function switchTab(tabName) {
     }
 
     layout(true);                                                   // susunan awal
+    // Foto dimuat bertahap (lazy): susun ulang pelan-pelan setelah ukuran foto diketahui
+    let imgTimer;
+    galleries.forEach(function (g) {
+        g.cards.forEach(function (c) {
+            const im = c.querySelector('img');
+            if (im && !im.complete) im.addEventListener('load', function () {
+                clearTimeout(imgTimer);
+                imgTimer = setTimeout(function () { layout(true); }, 400);
+            }, { once: true });
+        });
+    });
     window.addEventListener('load', function () { layout(true); }); // susun ulang setelah ukuran foto diketahui
     window.addEventListener('resize', onResize);
 
@@ -427,7 +450,7 @@ window.switchTab = switchTab;
 
     // Not musik beterbangan saat musik menyala
     function spawnNote() {
-        if (document.hidden) return;
+        if (document.hidden || document.querySelectorAll('.note').length > 6) return;
         const n = document.createElement('span');
         n.className = 'note';
         n.setAttribute('aria-hidden', 'true');
@@ -440,7 +463,7 @@ window.switchTab = switchTab;
         document.body.appendChild(n);
         n.addEventListener('animationend', function () { n.remove(); });
     }
-    function startNotes() { if (!REDUCE_MOTION && !noteTimer) noteTimer = setInterval(spawnNote, 480); }
+    function startNotes() { if (!REDUCE_MOTION && !LITE && !noteTimer) noteTimer = setInterval(spawnNote, 900); }
     function stopNotes() { clearInterval(noteTimer); noteTimer = null; }
 
     function setPlaying(on) {
@@ -448,13 +471,13 @@ window.switchTab = switchTab;
         clearTimeout(fadeTimer);
         if (on) {
             root.classList.remove('music-fading');
-            root.classList.add('music-on');
+            root.classList.add('music-text');
             startNotes();
-        } else if (root.classList.contains('music-on')) {
+        } else if (root.classList.contains('music-text')) {
             root.classList.add('music-fading'); // efek memudar halus dulu, baru dilepas
             stopNotes();
             fadeTimer = setTimeout(function () {
-                root.classList.remove('music-on', 'music-fading');
+                root.classList.remove('music-text', 'music-fading');
                 if (vid) { vid.pause(); try { vid.currentTime = 0; } catch (e) {} }
             }, 1100);
         }
@@ -465,7 +488,9 @@ window.switchTab = switchTab;
         if (label) label.textContent = on ? 'Musik menyala' : 'Musik mati';
 
         // karakter joget: putar saat musik menyala, berhenti saat mati
-        if (vid && on) {
+        if (vid && on && LITE && !DANCER_ON_LITE) {
+            dancer.classList.add('no-video'); // mode ringan: video tidak diputar
+        } else if (vid && on) {
             dancer.classList.remove('no-video');
             const p = vid.play();
             if (p && p.catch) p.catch(function () { dancer.classList.add('no-video'); });
@@ -499,26 +524,25 @@ window.switchTab = switchTab;
     });
     audio.addEventListener('error', function () { setPlaying(false); showMsg('File musik tidak ditemukan'); });
     audio.addEventListener('ended', function () { setPlaying(false); store.set('musik', 'off'); });
-    audio.addEventListener('timeupdate', function () { if (!audio.paused) store.set('musik_t', String(audio.currentTime)); });
+    // Hemat CPU/baterai: video berhenti saat tab disembunyikan
+    document.addEventListener('visibilitychange', function () {
+        if (!vid || !root.classList.contains('music-text')) return;
+        if (document.hidden) vid.pause();
+        else if (!audio.paused && !dancer.classList.contains('no-video')) { const p = vid.play(); if (p && p.catch) p.catch(function () {}); }
+    });
 
-    // Lanjutkan musik dari halaman sebelumnya
-    if (store.get('musik') === 'on') {
-        const t0 = parseFloat(store.get('musik_t')) || 0;
-        audio.preload = 'auto';
-        audio.addEventListener('loadedmetadata', function () { try { audio.currentTime = t0; } catch (e) {} }, { once: true });
-        audio.load();
-        const p = audio.play();
-        if (p && p.then) {
-            p.then(function () { setPlaying(true); }).catch(function () {
-                // Browser menahan autoplay: lanjutkan pada sentuhan/klik pertama
-                if (label) label.textContent = 'Ketuk untuk lanjut';
-                const go = function (e) {
-                    if (btn.contains(e.target) || !audio.paused) return;
-                    ['pointerdown', 'keydown'].forEach(function (ev) { document.removeEventListener(ev, go, true); });
-                    audio.play().then(function () { setPlaying(true); }).catch(function () {});
-                };
-                ['pointerdown', 'keydown'].forEach(function (ev) { document.addEventListener(ev, go, true); });
-            });
-        }
-    }
+    // Musik TIDAK dilanjutkan di halaman lain (supaya tidak lag): berhenti saat pindah halaman.
+    store.set('musik', 'off');
+    store.set('musik_t', '0');
+    window.addEventListener('pagehide', function () {
+        try { audio.pause(); } catch (e) {}
+        store.set('musik', 'off');
+    });
+    // Kembali lewat tombol Back (halaman dari cache): pastikan tampilan musik mati
+    window.addEventListener('pageshow', function (e) {
+        if (!e.persisted) return;
+        audio.pause();
+        try { audio.currentTime = 0; } catch (err) {}
+        setPlaying(false);
+    });
 })();

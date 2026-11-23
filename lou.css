@@ -649,12 +649,9 @@ html.music-on:not(.dark):not(.music-fading) body::before { animation-duration: 1
    Mematikan efek berat yang membuat lag saat musik menyala
    ===================================================== */
 .note { text-shadow: none; }
-html.lite::before, html.lite::after, html.lite body::after { display: none !important; animation: none !important; }
 html.lite .topbar::before { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--bg); }
 html.lite .note { display: none; }
 
-html.lite.music-on .profile-container,
-html.lite.music-on .profile-photo,
 html.lite.music-on .name-text-effect,
 html.lite.music-on .beat-title,
 html.lite.music-on .socials li,
@@ -663,10 +660,79 @@ html.lite.music-on .card.is-in,
 html.lite.music-on .music-btn,
 html.lite.music-on .dancer,
 html.lite.music-on .topbar::after { animation: none !important; }
-html.lite.music-on .profile-container::before, html.lite.music-on .profile-container::after,
-html.lite.music-on .profile-photo::before, html.lite.music-on .profile-photo::after { display: none; }
 html.lite.music-on:not(.music-fading) .name-text-effect,
 html.lite.music-on:not(.music-fading) .beat-title { background-position: 40% 0; filter: none !important; }
 html.lite.music-on.dark .topbar::after { box-shadow: none; }
 html.lite .card-img { will-change: auto; }
 html.lite .dancer { box-shadow: none !important; }
+
+/* =====================================================
+   SEDERHANA & RINGAN
+   ===================================================== */
+html.js .fade-in { transform: translateY(20px); transition: opacity 0.9s ease, transform 0.9s ease; }
+html.js .fade-in.in { opacity: 1; transform: none; }
+html.js .reveal { transition: opacity 0.8s ease, transform 0.8s ease; }
+html.js .reveal.in { opacity: 1; transform: none; }
+
+/* equalizer: pakai transform (bukan height) supaya tidak memberatkan */
+.music-bars i { height: 100%; transform: scaleY(0.3); transform-origin: bottom; animation-name: eq2; }
+@keyframes eq2 { to { transform: scaleY(1); } }
+
+/* PROFIL ala DJ: cincin berdenyut + foto berdetak mengikuti beat (hanya transform & opacity) */
+html.lite.music-on .profile-container,
+html.lite.music-on .profile-photo { overflow: visible; border-color: #ff6b9d; animation: none; }
+html.lite.music-on:not(.music-fading) .profile-container,
+html.lite.music-on:not(.music-fading) .profile-photo { animation: djBeat 0.6s ease-in-out infinite alternate; }
+@keyframes djBeat { from { scale: 1; } to { scale: 1.045; } }
+html.lite.music-on .profile-container::before, html.lite.music-on .profile-photo::before { border-color: #ff6b9d; box-shadow: none; animation: waveOut 1.8s ease-out infinite; }
+html.lite.music-on .profile-container::after,  html.lite.music-on .profile-photo::after  { border-color: #ffd166; box-shadow: none; animation: waveOut 1.8s ease-out 0.9s infinite; }
+html.lite.music-on.dark .profile-container, html.lite.music-on.dark .profile-photo { border-color: #00d4ff; }
+html.lite.music-on.dark .profile-container::before, html.lite.music-on.dark .profile-photo::before { border-color: #00d4ff; box-shadow: none; }
+html.lite.music-on.dark .profile-container::after,  html.lite.music-on.dark .profile-photo::after  { border-color: #b197fc; box-shadow: none; }
+
+/* karakter joget: kecil & polos */
+html.lite .dancer { width: clamp(72px, 16vw, 120px); }
+html.lite .dancer video { max-height: 22vh; }
+html.lite.dark .dancer { border-color: #00d4ff; }
+
+/* =====================================================
+   LATAR SAAT MUSIK MENYALA: berwarna seperti awal, tapi ringan
+   (gambar kotak sudah jadi, hanya opacity yang bergerak - tanpa mask/hue-rotate)
+   ===================================================== */
+html.lite body::before { animation: none; will-change: auto; }
+
+/* malam: aurora statis + 2 lapis kotak neon yang berkelip */
+html.dark::after { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cpath d='M0 .5H160M0 40.5H160M0 80.5H160M0 120.5H160M.5 0V160M40.5 0V160M80.5 0V160M120.5 0V160' stroke='%2300d4ff' stroke-opacity='.2' fill='none'/%3E%3Cg fill-opacity='.45'%3E%3Crect x='40' y='40' width='40' height='40' fill='%2300d4ff'/%3E%3Crect x='120' y='0' width='40' height='40' fill='%23ff2e63'/%3E%3Crect x='0' y='120' width='40' height='40' fill='%237b2fff'/%3E%3Crect x='80' y='80' width='40' height='40' fill='%2300ff9d'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 160px 160px; transition: opacity 1s ease; }
+html.dark body::after {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg fill-opacity='.45'%3E%3Crect x='0' y='0' width='40' height='40' fill='%23ff9a00'/%3E%3Crect x='120' y='40' width='40' height='40' fill='%23fff200'/%3E%3Crect x='40' y='120' width='40' height='40' fill='%23ff2e63'/%3E%3Crect x='160' y='160' width='40' height='40' fill='%2300d4ff'/%3E%3Crect x='80' y='80' width='40' height='40' fill='%23b197fc'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 200px 200px;
+    -webkit-mask-image: none; mask-image: none;
+}
+html.dark.music-on:not(.music-fading)::before { opacity: 0.75; animation: none; will-change: auto; }
+html.dark.music-on:not(.music-fading)::after { will-change: opacity; animation: twinkle 4.4s ease-in-out infinite; }
+html.dark.music-on:not(.music-fading) body::after { will-change: opacity; filter: none; animation: twinkle 5.6s ease-in-out -2s infinite; }
+html.dark.music-on.music-fading::before, html.dark.music-on.music-fading::after, html.dark.music-on.music-fading body::after { opacity: 0; animation: none; }
+
+/* =====================================================
+   LATAR SAAT MUSIK MATI: sederhana & ringan
+   siang: satu gradasi pastel lembut (tanpa riak bergerak); malam: hitam polos
+   ===================================================== */
+html:not(.dark) body {
+    background-image: linear-gradient(160deg, rgba(255, 183, 140, 0.30) 0%, rgba(140, 185, 255, 0.22) 50%, rgba(140, 220, 190, 0.28) 100%);
+}
+html:not(.dark) body::before { display: none; }
+
+/* =====================================================
+   SAAT MUSIK MENYALA: hanya warna teks judul yang berubah
+   (efek DJ, latar kotak-kotak, joget, not, dll dimatikan)
+   ===================================================== */
+html.music-text:not(.music-fading) .name-text-effect,
+html.music-text:not(.music-fading) .beat-title {
+    background-image: linear-gradient(90deg, #ff6b6b, #ffd166, #06d6a0, #4dabf7, #b197fc, #ff6b6b);
+    background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: rainbowText 6s linear infinite;
+}
+
+/* Video joget: tampil saat musik menyala (kecil, tanpa efek tambahan) */
+html.music-text .dancer { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+html.music-text.music-fading .dancer { opacity: 0; transform: translateY(24px) scale(0.9); transition: opacity 1s ease, transform 1s ease; }

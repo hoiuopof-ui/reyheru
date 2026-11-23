@@ -11,15 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>try{if(localStorage.getItem('tema')==='light')document.documentElement.classList.remove('dark');document.documentElement.classList.add('js')}catch(e){}</script>
-    <!-- Tailwind CSS (tata letak) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Space Grotesk', 'sans-serif'] } } }
-        }
-    </script>
     <link rel="stylesheet" href="lou.css">
+    <!-- Tata letak (Tailwind sudah dikompilasi, tanpa script) -->
+    <link rel="stylesheet" href="tw.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -79,7 +73,7 @@
         <!-- HERO -->
         <section id="hero" class="relative w-full h-screen flex items-center justify-center overflow-hidden">
             <div class="absolute inset-0 w-full h-full">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=65&w=1280&auto=format&fit=crop"
                      alt="Hero Background" class="w-full h-full object-cover opacity-50 scale-110" id="hero-img">
                 <div class="hero-fade absolute inset-0"></div>
             </div>
@@ -186,54 +180,35 @@
         </video>
     </div>
 
-    <!-- Pustaka animasi (GSAP & Lenis) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
     <script>
-        gsap.registerPlugin(ScrollTrigger);
+        // Animasi sederhana (tanpa pustaka): hero muncul setelah loading, bagian lain muncul saat di-scroll
+        (function () {
+            var started = false;
+            function startHero() {
+                if (started) return;
+                started = true;
+                ['hero-sub', 'hero-title', 'hero-cta'].forEach(function (id, i) {
+                    var el = document.getElementById(id);
+                    if (!el) return;
+                    el.style.transitionDelay = (0.1 + i * 0.25) + 's';
+                    el.classList.add('in');
+                });
+            }
+            window.addEventListener('lou:ready', startHero);
+            setTimeout(startHero, 5000);
 
-        // Scroll halus (Lenis) — dipakai juga oleh menu & anchor di lou.js
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            direction: 'vertical',
-            gestureDirection: 'vertical',
-            smooth: true,
-            smoothTouch: false,
-        });
-        window.louLenis = lenis;
-        lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time) => { lenis.raf(time * 1000); });
-        gsap.ticker.lagSmoothing(0);
-
-        // Animasi hero: mulai setelah loading screen selesai
-        let heroStarted = false;
-        function startHero() {
-            if (heroStarted) return;
-            heroStarted = true;
-            gsap.timeline()
-                .to('#hero-sub',   { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }, 0.1)
-                .to('#hero-title', { opacity: 1, y: 0, duration: 1.6, ease: 'power3.out' }, 0.3)
-                .to('#hero-cta',   { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' }, 0.8);
-        }
-        gsap.set(['#hero-sub', '#hero-title', '#hero-cta'], { y: 24 });
-        window.addEventListener('lou:ready', startHero);
-        setTimeout(startHero, 5000);
-
-        // Parallax gambar hero
-        gsap.to('#hero-img', {
-            yPercent: 30, ease: 'none',
-            scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
-        });
-
-        // Muncul halus saat di-scroll
-        document.querySelectorAll('.reveal').forEach((el) => {
-            gsap.to(el, {
-                y: 0, opacity: 1, duration: 1.2, ease: 'power3.out',
-                scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' }
-            });
-        });
+            var els = document.querySelectorAll('.reveal');
+            if ('IntersectionObserver' in window) {
+                var io = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) {
+                        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+                    });
+                }, { rootMargin: '0px 0px -12% 0px' });
+                els.forEach(function (el) { io.observe(el); });
+            } else {
+                els.forEach(function (el) { el.classList.add('in'); });
+            }
+        })();
     </script>
     <script src="lou.js"></script>
 </body>
