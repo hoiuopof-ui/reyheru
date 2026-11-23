@@ -643,3 +643,30 @@ html.music-on:not(.dark):not(.music-fading) body::before { animation-duration: 1
     html.music-on .socials li, html.music-on .gallery-nav,
     html.music-on .card.is-in, html.dark::before { animation: none !important; }
 }
+
+/* =====================================================
+   MODE RINGAN (html.lite) - otomatis di HP / perangkat lemah
+   Mematikan efek berat yang membuat lag saat musik menyala
+   ===================================================== */
+.note { text-shadow: none; }
+html.lite::before, html.lite::after, html.lite body::after { display: none !important; animation: none !important; }
+html.lite .topbar::before { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--bg); }
+html.lite .note { display: none; }
+
+html.lite.music-on .profile-container,
+html.lite.music-on .profile-photo,
+html.lite.music-on .name-text-effect,
+html.lite.music-on .beat-title,
+html.lite.music-on .socials li,
+html.lite.music-on .gallery-nav,
+html.lite.music-on .card.is-in,
+html.lite.music-on .music-btn,
+html.lite.music-on .dancer,
+html.lite.music-on .topbar::after { animation: none !important; }
+html.lite.music-on .profile-container::before, html.lite.music-on .profile-container::after,
+html.lite.music-on .profile-photo::before, html.lite.music-on .profile-photo::after { display: none; }
+html.lite.music-on:not(.music-fading) .name-text-effect,
+html.lite.music-on:not(.music-fading) .beat-title { background-position: 40% 0; filter: none !important; }
+html.lite.music-on.dark .topbar::after { box-shadow: none; }
+html.lite .card-img { will-change: auto; }
+html.lite .dancer { box-shadow: none !important; }
