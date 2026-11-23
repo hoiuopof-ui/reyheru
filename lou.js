@@ -1,25 +1,60 @@
-// 1. LOGIKA GANTI TEMA (LIGHT/DARK MODE)
-function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    try { localStorage.setItem('tema', isDark ? 'dark' : 'light'); } catch (e) {} // ingat pilihan tema antar halaman
+// =====================================================================
+// lou.js — logika bersama untuk hio.html, index.html, cerita/cerita.html
+// Semua fitur lama tetap ada; fungsi yang dipanggil dari onclick tetap global.
+// =====================================================================
+(function () { document.documentElement.classList.add('js'); })();
+
+const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+
+// 1. LOGIKA GANTI TEMA (LIGHT/DARK MODE) — tersimpan & ikut ke semua halaman
+function syncThemeLabel() {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.querySelectorAll('.theme-btn').forEach(function (b) {
+        const t = isDark ? 'Ganti ke mode siang' : 'Ganti ke mode malam';
+        b.setAttribute('aria-label', t);
+        b.title = t;
+    });
 }
+function toggleTheme() {
+    const apply = function () {
+        const isDark = document.documentElement.classList.toggle('dark');
+        store.set('tema', isDark ? 'dark' : 'light');
+        syncThemeLabel();
+    };
+    // Transisi tema yang halus (cross-fade) bila browser mendukung
+    if (document.startViewTransition && !REDUCE_MOTION) document.startViewTransition(apply);
+    else apply();
+}
+syncThemeLabel();
 
 // ================= LOGIKA LOADING SCREEN =================
-window.addEventListener('load', function () {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (!loadingScreen) return;
-
-    // Tampil minimal 0.5 detik agar tidak berkedip
-    setTimeout(() => {
-        loadingScreen.style.opacity = '0';
-        loadingScreen.style.pointerEvents = 'none';
-
-        // Hapus dari layar setelah fade selesai (sesuai duration-700 di HTML)
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-        }, 700);
-    }, 500);
-});
+(function () {
+    let finished = false;
+    function finish() {
+        if (finished) return;
+        finished = true;
+        const ls = document.getElementById('loading-screen');
+        if (ls) {
+            ls.classList.add('is-done');
+            setTimeout(function () { ls.style.display = 'none'; }, 850);
+        }
+        document.documentElement.classList.add('is-ready');
+        window.dispatchEvent(new Event('lou:ready'));
+        // Setelah animasi masuk selesai, kunci tampilannya agar efek musik tidak membuatnya hilang
+        setTimeout(function () {
+            document.querySelectorAll('.fade-in-up').forEach(function (el) { el.classList.add('is-shown'); });
+        }, 1900);
+    }
+    let seen = false;
+    try { seen = sessionStorage.getItem('lou_seen') === '1'; sessionStorage.setItem('lou_seen', '1'); } catch (e) {}
+    const wait = seen ? 150 : 600; // kunjungan berikutnya lebih singkat
+    window.addEventListener('load', function () { setTimeout(finish, wait); });
+    setTimeout(finish, 4500); // jaga-jaga bila ada gambar yang lambat
+})();
 
 // 2. LOGIKA GANTI FOTO PROFIL
 const profilePhotos = [
@@ -27,6 +62,7 @@ const profilePhotos = [
     "profil/2.jpeg"  // Foto 2
 ];
 let profileIndex = 0;
+let profileBusy = false;
 
 (function () {
     const img = document.getElementById('profileImg');
@@ -35,7 +71,6 @@ let profileIndex = 0;
     img.addEventListener('load', function () { img.classList.remove('is-broken'); });
     if (img.complete && img.naturalWidth === 0) img.classList.add('is-broken');
 })();
-let profileBusy = false;
 
 // Efek bintang saat foto profil diklik
 function burstStars(el) {
@@ -64,11 +99,11 @@ function burstStars(el) {
 }
 
 function toggleProfile() {
-    if (profileBusy) return; // cegah klik beruntun saat transisi
-    profileBusy = true;
-    burstStars(document.querySelector('.profile-container'));
-
     const img = document.getElementById('profileImg');
+    if (!img || profileBusy) return; // cegah klik beruntun saat transisi
+    profileBusy = true;
+    burstStars(document.querySelector('.profile-container, .profile-photo'));
+
     profileIndex = (profileIndex + 1) % profilePhotos.length;
 
     // Muat foto berikutnya dulu supaya pergantiannya mulus
@@ -76,15 +111,35 @@ function toggleProfile() {
     next.src = profilePhotos[profileIndex];
 
     img.classList.add('fade-out');
-
-    setTimeout(() => {
+    setTimeout(function () {
         img.src = profilePhotos[profileIndex];
         img.classList.remove('fade-out');
         profileBusy = false;
     }, 350);
 }
 
-// 3. LOGIKA PINDAH TAB GALERI
+// 3. REVEAL KARTU GALERI SAAT MUNCUL DI LAYAR (halus & berurutan)
+const cardReveal = (function () {
+    const io = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+        });
+    }, { rootMargin: '0px 0px -6% 0px', threshold: 0.06 }) : null;
+
+    return function (cards, restart) {
+        cards.forEach(function (c, i) {
+            c.style.setProperty('--d', ((i % 4) * 90) + 'ms');
+            if (restart) c.classList.remove('is-in');
+        });
+        if (restart) void document.body.offsetHeight; // paksa reflow agar transisi diputar ulang
+        cards.forEach(function (c) {
+            if (!io) { c.classList.add('is-in'); return; }
+            if (!c.classList.contains('is-in')) io.observe(c);
+        });
+    };
+})();
+
+// 4. LOGIKA PINDAH TAB GALERI
 function switchTab(tabName) {
     const btnDesign = document.getElementById('btn-design');
     const btnPhoto = document.getElementById('btn-photo');
@@ -97,14 +152,21 @@ function switchTab(tabName) {
 
     btnDesign.classList.toggle('active-tab', isDesign);
     btnPhoto.classList.toggle('active-tab', !isDesign);
+    btnDesign.setAttribute('aria-selected', isDesign ? 'true' : 'false');
+    btnPhoto.setAttribute('aria-selected', isDesign ? 'false' : 'true');
+    const nav = btnDesign.closest('.gallery-nav');
+    if (nav) nav.setAttribute('data-active', isDesign ? 'design' : 'photo');
 
     galleryDesign.classList.toggle('gallery-visible', isDesign);
     galleryDesign.classList.toggle('gallery-hidden', !isDesign);
     galleryPhoto.classList.toggle('gallery-visible', !isDesign);
     galleryPhoto.classList.toggle('gallery-hidden', isDesign);
+
+    const shown = isDesign ? galleryDesign : galleryPhoto;
+    cardReveal(Array.from(shown.querySelectorAll('.card')), true);
 }
 
-// 4. LIGHTBOX: klik / ketuk 2 kali pada foto atau desain untuk full screen
+// 5. LIGHTBOX: klik / ketuk 2 kali pada foto atau desain untuk full screen
 (function () {
     const DOUBLE_CLICK_MS = 350; // jarak maksimal antar dua klik
     const lightbox = document.getElementById('lightbox');
@@ -176,19 +238,19 @@ function switchTab(tabName) {
     });
 })();
 
-// 5. GALERI MASONRY (laptop/tablet): foto tampil utuh, disusun ke kolom terpendek
-//    Di HP tetap memakai grid 1 kolom seperti sebelumnya.
+// 6. GALERI MASONRY (laptop/tablet): foto tampil utuh, disusun ke kolom terpendek
+//    Di HP memakai 2 kolom.
 (function () {
     const mq = window.matchMedia('(min-width: 769px)');
 
     const galleries = Array.from(document.querySelectorAll('.gallery-container')).map(function (el) {
         return { el: el, cards: Array.from(el.querySelectorAll('.card')), cols: null };
     });
+    if (!galleries.length) return;
 
-    // Keterangan di overlay (diambil dari alt gambar) + jeda animasi berurutan
+    // Keterangan di overlay (diambil dari alt gambar) + nomor urut
     galleries.forEach(function (g) {
         g.cards.forEach(function (card, i) {
-            card.style.animationDelay = (i * 0.08) + 's';
             const img = card.querySelector('img');
             const title = card.querySelector('.card-overlay h3');
             if (img && title && !title.textContent.trim()) title.textContent = img.alt;
@@ -206,12 +268,6 @@ function switchTab(tabName) {
     }
 
     function build(g, n) {
-        if (n === 0) {
-            g.el.classList.remove('is-masonry');
-            g.el.replaceChildren.apply(g.el, g.cards);
-            return;
-        }
-
         const cols = [];
         const heights = [];
         for (let i = 0; i < n; i++) {
@@ -252,31 +308,99 @@ function switchTab(tabName) {
         resizeTimer = setTimeout(function () { layout(false); }, 150);
     }
 
-    layout(true);                                           // susunan awal
+    layout(true);                                                   // susunan awal
     window.addEventListener('load', function () { layout(true); }); // susun ulang setelah ukuran foto diketahui
     window.addEventListener('resize', onResize);
+
+    // Kartu muncul berurutan; hanya galeri yang sedang tampil
+    const visible = galleries.filter(function (g) { return g.el.classList.contains('gallery-visible'); });
+    visible.forEach(function (g) { cardReveal(g.cards, false); });
+    galleries.forEach(function (g) {
+        if (visible.indexOf(g) === -1) g.cards.forEach(function (c, i) { c.style.setProperty('--d', ((i % 4) * 90) + 'ms'); });
+    });
 })();
 
-// 6. PASTIKAN FUNGSI BISA DIPANGGIL DARI onclick DI HTML
-//    Beberapa lingkungan (editor online, bundler, <script type="module">) membungkus
-//    kode dalam scope sendiri sehingga fungsi tidak otomatis global. Baris ini
-//    membuatnya tetap global tanpa mengubah isi fungsi di atas.
+// 7. FUNGSI HARUS BISA DIPANGGIL DARI onclick DI HTML
 window.toggleTheme = toggleTheme;
 window.toggleProfile = toggleProfile;
 window.switchTab = switchTab;
 
-// 7. PROTEKSI FOTO: cegah klik kanan, tahan lama (HP), dan drag pada gambar
+// 8. PROTEKSI FOTO: cegah klik kanan, tahan lama (HP), dan drag pada gambar
 (function () {
     document.querySelectorAll('img').forEach(function (img) { img.draggable = false; });
     document.addEventListener('contextmenu', function (e) {
-        if (e.target.closest && e.target.closest('img, .card, .lightbox, .profile-container')) e.preventDefault();
+        if (e.target.closest && e.target.closest('img, .card, .lightbox, .profile-container, .profile-photo')) e.preventDefault();
     });
     document.addEventListener('dragstart', function (e) {
         if (e.target.tagName === 'IMG') e.preventDefault();
     });
 })();
 
-// 8. TOMBOL MUSIK: tekan = putar, tekan lagi = mati (ada penanda di tombol & di ikon menu)
+// 9. NAVIGASI: sembunyi saat scroll turun, menu HP, transisi antar halaman
+(function () {
+    const root = document.documentElement;
+    const bar = document.querySelector('.topbar');
+    const menuBtn = document.getElementById('menu-btn');
+
+    function setMenu(open) {
+        root.classList.toggle('menu-open', open);
+        if (menuBtn) {
+            menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            menuBtn.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+        }
+        if (window.louLenis) { open ? window.louLenis.stop() : window.louLenis.start(); }
+        else document.body.style.overflow = open ? 'hidden' : '';
+        if (open && bar) bar.classList.remove('is-hidden');
+    }
+    if (menuBtn) menuBtn.addEventListener('click', function () { setMenu(!root.classList.contains('menu-open')); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && root.classList.contains('menu-open')) setMenu(false); });
+    window.addEventListener('resize', function () { if (window.innerWidth >= 768 && root.classList.contains('menu-open')) setMenu(false); });
+
+    // Bar menghilang saat scroll turun, muncul saat scroll naik
+    if (bar) {
+        let lastY = window.scrollY, ticking = false;
+        window.addEventListener('scroll', function () {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(function () {
+                const y = window.scrollY;
+                const down = y > lastY + 4, up = y < lastY - 4;
+                if (y < 80 || up) bar.classList.remove('is-hidden');
+                else if (down && !root.classList.contains('menu-open')) bar.classList.add('is-hidden');
+                if (down || up) lastY = y;
+                ticking = false;
+            });
+        }, { passive: true });
+    }
+
+    // Transisi pindah halaman: memudar dulu, lalu pindah
+    document.addEventListener('click', function (e) {
+        const a = e.target.closest && e.target.closest('a[href]');
+        if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (a.target && a.target !== '_self') return;
+        if (a.hasAttribute('download')) return;
+        let url;
+        try { url = new URL(a.href, location.href); } catch (err) { return; }
+        if (url.protocol !== location.protocol || url.host !== location.host) return;
+
+        const samePage = url.pathname === location.pathname;
+        if (samePage && url.hash) {                       // anchor di halaman yang sama
+            const target = document.querySelector(url.hash);
+            if (target && window.louLenis) { e.preventDefault(); setMenu(false); window.louLenis.scrollTo(target); }
+            else if (root.classList.contains('menu-open')) setMenu(false);
+            return;
+        }
+        if (samePage) return;
+        e.preventDefault();
+        root.classList.add('page-leaving');
+        setTimeout(function () { location.href = a.href; }, REDUCE_MOTION ? 0 : 380);
+    });
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) { root.classList.remove('page-leaving'); setMenu(false); }
+    });
+})();
+
+// 10. TOMBOL MUSIK: tekan = putar, tekan lagi = mati. Status ikut ke halaman lain.
 (function () {
     const btn = document.getElementById('music-btn');
     const audio = document.getElementById('bg-music');
@@ -284,18 +408,51 @@ window.switchTab = switchTab;
     const label = btn.querySelector('.music-label');
     const dancer = document.getElementById('dancer');
     const vid = dancer ? dancer.querySelector('video') : null;
-    let msgTimer;
-    let fadeTimer;
+    const root = document.documentElement;
+    let msgTimer, fadeTimer, noteTimer;
+
+    function toast(text) {
+        let t = document.getElementById('lou-toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'lou-toast';
+            t.setAttribute('role', 'status');
+            document.body.appendChild(t);
+        }
+        t.textContent = text;
+        t.classList.add('is-show');
+        clearTimeout(t._h);
+        t._h = setTimeout(function () { t.classList.remove('is-show'); }, 2800);
+    }
+
+    // Not musik beterbangan saat musik menyala
+    function spawnNote() {
+        if (document.hidden) return;
+        const n = document.createElement('span');
+        n.className = 'note';
+        n.setAttribute('aria-hidden', 'true');
+        n.textContent = ['\u266A', '\u266B', '\u266C', '\u2669'][Math.floor(Math.random() * 4)];
+        n.style.left = (Math.random() * 92 + 4) + 'vw';
+        n.style.fontSize = (16 + Math.random() * 20) + 'px';
+        n.style.setProperty('--h', Math.floor(Math.random() * 360));
+        n.style.setProperty('--sway', (Math.random() * 90 - 45) + 'px');
+        n.style.animationDuration = (3.8 + Math.random() * 2.4) + 's';
+        document.body.appendChild(n);
+        n.addEventListener('animationend', function () { n.remove(); });
+    }
+    function startNotes() { if (!REDUCE_MOTION && !noteTimer) noteTimer = setInterval(spawnNote, 480); }
+    function stopNotes() { clearInterval(noteTimer); noteTimer = null; }
 
     function setPlaying(on) {
         btn.classList.toggle('is-playing', on);
-        const root = document.documentElement;
         clearTimeout(fadeTimer);
         if (on) {
             root.classList.remove('music-fading');
             root.classList.add('music-on');
+            startNotes();
         } else if (root.classList.contains('music-on')) {
             root.classList.add('music-fading'); // efek memudar halus dulu, baru dilepas
+            stopNotes();
             fadeTimer = setTimeout(function () {
                 root.classList.remove('music-on', 'music-fading');
                 if (vid) { vid.pause(); try { vid.currentTime = 0; } catch (e) {} }
@@ -308,16 +465,15 @@ window.switchTab = switchTab;
         if (label) label.textContent = on ? 'Musik menyala' : 'Musik mati';
 
         // karakter joget: putar saat musik menyala, berhenti saat mati
-        if (vid) {
-            if (on) {
-                dancer.classList.remove('no-video');
-                const p = vid.play();
-                if (p && p.catch) p.catch(function () { dancer.classList.add('no-video'); });
-            }
+        if (vid && on) {
+            dancer.classList.remove('no-video');
+            const p = vid.play();
+            if (p && p.catch) p.catch(function () { dancer.classList.add('no-video'); });
         }
     }
 
     function showMsg(text) {
+        toast(text);
         if (!label) return;
         label.textContent = text;
         clearTimeout(msgTimer);
@@ -326,7 +482,10 @@ window.switchTab = switchTab;
 
     btn.addEventListener('click', function () {
         if (audio.paused) {
-            audio.play().then(function () { setPlaying(true); }).catch(function () {
+            audio.play().then(function () {
+                setPlaying(true);
+                store.set('musik', 'on');
+            }).catch(function () {
                 setPlaying(false);
                 showMsg('File musik tidak ditemukan');
             });
@@ -334,8 +493,32 @@ window.switchTab = switchTab;
             audio.pause();
             audio.currentTime = 0; // mati total, putar lagi mulai dari awal
             setPlaying(false);
+            store.set('musik', 'off');
+            store.set('musik_t', '0');
         }
     });
     audio.addEventListener('error', function () { setPlaying(false); showMsg('File musik tidak ditemukan'); });
-    audio.addEventListener('ended', function () { setPlaying(false); });
+    audio.addEventListener('ended', function () { setPlaying(false); store.set('musik', 'off'); });
+    audio.addEventListener('timeupdate', function () { if (!audio.paused) store.set('musik_t', String(audio.currentTime)); });
+
+    // Lanjutkan musik dari halaman sebelumnya
+    if (store.get('musik') === 'on') {
+        const t0 = parseFloat(store.get('musik_t')) || 0;
+        audio.preload = 'auto';
+        audio.addEventListener('loadedmetadata', function () { try { audio.currentTime = t0; } catch (e) {} }, { once: true });
+        audio.load();
+        const p = audio.play();
+        if (p && p.then) {
+            p.then(function () { setPlaying(true); }).catch(function () {
+                // Browser menahan autoplay: lanjutkan pada sentuhan/klik pertama
+                if (label) label.textContent = 'Ketuk untuk lanjut';
+                const go = function (e) {
+                    if (btn.contains(e.target) || !audio.paused) return;
+                    ['pointerdown', 'keydown'].forEach(function (ev) { document.removeEventListener(ev, go, true); });
+                    audio.play().then(function () { setPlaying(true); }).catch(function () {});
+                };
+                ['pointerdown', 'keydown'].forEach(function (ev) { document.addEventListener(ev, go, true); });
+            });
+        }
+    }
 })();

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Desain dan fotografi - raheru_oi">
+    <title>raheru_oi</title>
+
+    <!-- Font: Space Grotesk (judul) & Inter (isi) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>try{if(localStorage.getItem('tema')==='light')document.documentElement.classList.remove('dark');document.documentElement.classList.add('js')}catch(e){}</script>
+    <link rel="stylesheet" href="lou.css">
+</head>
+<body class="page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6"/></symbol>
+  <symbol id="i-yt" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.5v5l4.5-2.5z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" style="stroke-width:2.4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+</svg>
+
+    <!-- ================= LOADING SCREEN ================= -->
+    <div id="loading-screen" aria-live="polite">
+        <span class="loading-brand">raheru_oi</span>
+        <div class="loading-bar" aria-hidden="true"></div>
+        <span class="loading-text">MEMUAT...</span>
+    </div>
+
+    <!-- ================= NAVIGASI ================= -->
+    <header class="topbar" id="navbar">
+        <div class="topbar-inner">
+            <a href="index.html" class="brand">raheru_oi</a>
+            <nav class="topnav" aria-label="Menu utama">
+                <a href="index.html">Home</a>
+                <a href="lou.html" aria-current="page">Galeri</a>
+                <a href="cerita/cerita.html">Cerita</a>
+            </nav>
+            <div class="topbar-actions">
+                <button type="button" id="music-btn" class="icon-btn music-btn" aria-pressed="false" aria-label="Putar musik" title="Putar musik">
+                    <span class="music-icons" aria-hidden="true"><svg class="i icon-play"><use href="#i-play"/></svg><svg class="i icon-pause"><use href="#i-pause"/></svg></span>
+                    <span class="music-label">Musik mati</span>
+                    <span class="music-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                </button>
+                <button type="button" class="icon-btn theme-btn" onclick="toggleTheme()" aria-label="Ganti tema" title="Ganti tema">
+                    <svg class="i ico icon-sun"><use href="#i-sun"/></svg>
+                    <svg class="i ico icon-moon"><use href="#i-moon"/></svg>
+                </button>
+                <a href="hio.html#contact" class="btn-pill talk">Let's Talk</a>
+                <button type="button" id="menu-btn" class="icon-btn menu-btn" aria-expanded="false" aria-label="Buka menu"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu layar penuh (HP) -->
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="index.html" style="--n:0">Home</a>
+        <a href="lou.html" style="--n:1">Galeri</a>
+        <a href="cerita/cerita.html" style="--n:2">Cerita</a>
+        <a href="index.html" class="btn-pill btn-lg">Let's Talk</a>
+    </div>
+
+    <main class="wrap">
+
+        <!-- PROFIL: foto, nama, dan tautan -->
+        <header class="profile">
+            <div class="profile-container fade-in-up" onclick="toggleProfile()" title="Klik untuk ganti foto">
+                <img id="profileImg" src="profil/1.jpeg" alt="Foto Rahel">
+            </div>
+            <h1 class="name-text-effect fade-in-up delay-100">RAHUL WAK</h1>
+            <ul class="socials fade-in-up delay-200">
+                <li><a href="https://www.instagram.com/raheru_oi/" target="_blank" rel="noopener noreferrer"><svg class="i"><use href="#i-ig"/></svg>Instagram</a></li>
+                <li><a href="https://www.instagram.com/ini_raheru_oi?lqvp=N28xNjkzcTMxZHk2" target="_blank" rel="noopener noreferrer"><svg class="i"><use href="#i-ig"/></svg>Instagram 2</a></li>
+                <li><a href="https://www.youtube.com/@RAYAKA7" target="_blank" rel="noopener noreferrer"><svg class="i"><use href="#i-yt"/></svg>YouTube</a></li>
+            </ul>
+        </header>
+
+        <!-- NAVIGASI PILIHAN -->
+        <nav class="gallery-nav fade-in-up" data-active="design" aria-label="Kategori galeri">
+            <button type="button" id="btn-photo" onclick="switchTab('photo')" class="btn-tab" aria-selected="false">Foto</button>
+            <button type="button" id="btn-design" onclick="switchTab('design')" class="btn-tab active-tab" aria-selected="true">Desain</button>
+        </nav>
+
+        <section class="gallery-section">
+
+            <!-- GALERI DESAIN -->
+            <div id="gallery-design" class="gallery-container gallery-visible">
+                <div class="card">
+                    <img src="desain/1.png" alt="Desain 1" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/2.png" alt="Desain 2" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/3.png" alt="Desain 3" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/4.png" alt="Desain 4" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/5.png" alt="Desain 5" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/6.png" alt="Desain 6" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/7.png" alt="Desain 7" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/8.png" alt="Desain 8" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/9.png" alt="Desain 9" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/10.png" alt="Desain 10" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/11.png" alt="Desain 11" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="desain/12.jpg" alt="Desain 12" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+            </div>
+
+            <!-- GALERI FOTO -->
+            <div id="gallery-photo" class="gallery-container gallery-hidden">
+                <div class="card">
+                    <img src="foto/1.jpeg" alt="Foto 1" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/2.jpeg" alt="Foto 2" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/3.jpeg" alt="Foto 3" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/4.jpeg" alt="Foto 4" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/5.JPG" alt="Foto 5" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/6.JPG" alt="Foto 6" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/7.jpeg" alt="Foto 7" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/8.jpeg" alt="Foto 8" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/9.JPG" alt="Foto 9" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/10.jpeg" alt="Foto 10" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/11.jpeg" alt="Foto 11" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/12.JPG" alt="Foto 12" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/13.jpeg" alt="Foto 13" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/14.jpeg" alt="Foto 14" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/15.jpeg" alt="Foto 15" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/16.jpeg" alt="Foto 16" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/17.jpeg" alt="Foto 17" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/18.jpeg" alt="Foto 18" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/19.jpeg" alt="Foto 19" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/20.jpeg" alt="Foto 20" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/21.jpeg" alt="Foto 21" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/22.jpeg" alt="Foto 22" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/23.png" alt="Foto 23" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/24.png" alt="Foto 24" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/25.png" alt="Foto 25" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/26.png" alt="Foto 26" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/27.png" alt="Foto 27" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/28.png" alt="Foto 28" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/29.jpeg" alt="Foto 29" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/30.jpeg" alt="Foto 30" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/31.jpeg" alt="Foto 31" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/32.jpeg" alt="Foto 32" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+                <div class="card">
+                    <img src="foto/33.jpeg" alt="Foto 33" class="card-img" decoding="async">
+                    <div class="card-overlay"><h3></h3></div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ALUR HALAMAN: Home -> Galeri -> Cerita -->
+        <nav class="flow-nav" aria-label="Navigasi halaman">
+            <a href="index.html" class="btn-pill btn-lg"><svg class="i i-back"><use href="#i-back"/></svg>Kembali ke Home</a>
+            <a href="cerita/cerita.html" class="btn-pill btn-lg is-solid">Baca Cerita<svg class="i i-arrow"><use href="#i-arrow"/></svg></a>
+        </nav>
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© 2026 raheru_oi. All Rights Reserved.</p>
+            <div class="footer-side">
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="lou.html">Galeri</a></li>
+                    <li><a href="cerita/cerita.html">Cerita</a></li>
+                </ul>
+                <ul class="socials">
+                    <li><a href="https://www.instagram.com/raheru_oi/" target="_blank" rel="noopener noreferrer"><svg class="i"><use href="#i-ig"/></svg>Instagram</a></li>
+                    <li><a href="https://www.instagram.com/ini_raheru_oi?lqvp=N28xNjkzcTMxZHk2" target="_blank" rel="noopener noreferrer"><svg class="i"><use href="#i-ig"/></svg>Instagram 2</a></li>
+                    <li><a href="https://www.youtube.com/@RAYAKA7" target="_blank" rel="noopener noreferrer"><svg class="i"><use href="#i-yt"/></svg>YouTube</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= LIGHTBOX (FOTO FULL SCREEN) ================= -->
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Pratinjau gambar" aria-hidden="true">
+        <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Tutup"><svg class="i"><use href="#i-x"/></svg></button>
+        <img id="lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+
+    <!-- Musik: letakkan lagu di musik/1.mp3 -->
+    <audio id="bg-music" src="musik/1.mp3" loop preload="none"></audio>
+
+    <!-- KARAKTER JOGET: muncul saat musik menyala (video/1.mp4) -->
+    <div id="dancer" class="dancer" aria-hidden="true">
+        <video muted loop playsinline preload="none">
+            <source src="video/1.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <script src="lou.js"></script>
+</body>
+</html>
